@@ -105,7 +105,7 @@
 				div.appendChild(canvas);
 				
 				const gl = canvas.getContext("webgl",{antialias:true});
-				gl.getExtension("OES_element_index_uint");
+				if(BG.bytes==4) gl.getExtension("OES_element_index_uint");
 				
 				BG.program = twgl.createProgramFromSources(gl,[`
 attribute vec3 position;
@@ -192,7 +192,7 @@ void main() {
 						gl.useProgram(BG.program);
 						twgl.setBuffersAndAttributes(gl,BG.programInfo,BG.bufferInfo);
 						twgl.setUniforms(BG.programInfo,BG.uniforms);
-						gl.drawElements(gl.TRIANGLES,BG.bufferInfo.numElements,gl.UNSIGNED_INT,0);
+						gl.drawElements(gl.TRIANGLES,BG.bufferInfo.numElements,(BG.bytes==4)?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT,0);
 						
 						frame++; 
 						frame%=totalFrames;

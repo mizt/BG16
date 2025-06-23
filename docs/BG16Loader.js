@@ -32,17 +32,35 @@ export const BGLoader = Object.freeze({
 						const rgb8 = U8.slice(offset+byteOffsets[1],(offset+byteOffsets[1]+byteLengths[1]));
 						
 						const len = +(json["accessors"][0]["count"]);
+						
+						const v = new Float32Array(len*3);
+						for(var n=0; n<v.length; n++) {
+							v[n] = U16toF32(v16[n]);
+						}
+						
+						const rgb = new Float32Array(len*3);
+						for(var n=0; n<rgb.length; n++) {
+							rgb[n] = rgb8[n]/255.0;
+						}
+						
 						if(len<=0xFFFF) {
 							
-							const v = new Float32Array(len*3);
-							for(var n=0; n<v.length; n++) {
-								v[n] = U16toF32(v16[n]);
+							const f = new Uint16Array(len);
+							for(var n=0; n<f.length; n++) {
+								f[n] = n;
 							}
 							
-							const rgb = new Float32Array(len*3);
-							for(var n=0; n<rgb.length; n++) {
-								rgb[n] = rgb8[n]/255.0;
+							const result = {};
+							result[url] = {
+								"v":v,
+								"rgb":rgb,
+								"f":f,
+								"bytes":2
 							}
+							
+							init(result);
+						}
+						else {
 							
 							const f = new Uint32Array(len);
 							for(var n=0; n<f.length; n++) {
@@ -58,10 +76,6 @@ export const BGLoader = Object.freeze({
 							}
 							
 							init(result);
-						}
-						else {
-							
-							init(null);
 						}
 					}
 				}
