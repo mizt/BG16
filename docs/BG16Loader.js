@@ -94,13 +94,11 @@ export const BGLoader = Object.freeze({
 			let data = {};
 			
 			const onload = (result) => {
-				if(result) {
-					const key = Object.keys(result)[0];
-					data[key] = result[key];
-					loaded++;
-					if(loaded===list.length) {
-						init(data);
-					}
+				const key = Object.keys(result)[0];
+				data[key] = result[key];
+				loaded++;
+				if(loaded===list.length) {
+					init(data);
 				}
 			};
 			
