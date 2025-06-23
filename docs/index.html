@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>BG16</title>
+		<meta name="robots" content="noindex, nofollow">
+		<link rel="icon" href="data:;base64,=">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			
+			* {
+				margin:0;
+				padding:0;
+				-webkit-user-select:none;
+				-moz-user-select:none;
+				-ms-user-select:none;
+			}
+			
+			body {
+				cursor:default;
+				background:#000;
+				width:100dvw;
+				height:100dvh;
+				overflow:hidden;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<script src="./twgl.min.js"></script>
+		<script type="module">
+			
+			const width = 1920<<1;
+			const height = 1080<<1;
+			
+			let index = 0;
+			let frame = 0;
+					
+			const totalFrames = 30*5;
+			
+			const PM = [
+				[1.450292,0,0,0,0,2.578297,0,0,-0.006221,0.009821,-1,-1,0,0,-0.001,0],
+				[1.443893,0,0,0,0,2.566920,0,0,0.001776,0.010879,-1,-1,0,0,-0.001,0],
+			];
+			
+			const E = [
+				[0,0,0],
+				[0.030739,0.054055,-0.000161],
+				
+			];
+			
+			const T = [
+				[0,0,0],
+				[0.011789,0.487970,-0.081845],
+			];
+			
+			const mul = (a,b)=>{
+				let m = [];
+				for(var n=0; n<16; n++) {
+					m.push(
+						a[((n>>2)<<2)+0]*b[ 0+(n&3)]+
+						a[((n>>2)<<2)+1]*b[ 4+(n&3)]+
+						a[((n>>2)<<2)+2]*b[ 8+(n&3)]+
+						a[((n>>2)<<2)+3]*b[12+(n&3)]
+					);
+				}
+				return m;
+			};
+			
+			const X = (t)=>{ 
+				return [
+					1.0,0,0,0,
+					0,Math.cos(t),-Math.sin(t),0,
+					0,Math.sin(t),Math.cos(t),0,
+					0,0,0,1
+				];
+			};
+			
+			const Y = (t)=>{ 
+				return [
+					Math.cos(t),0,Math.sin(t),0,
+					0,1,0,0,
+					-Math.sin(t),0,Math.cos(t),0,
+					0,0,0,1
+				];
+			};
+			
+			const Z = (t)=>{ 
+				return [
+					Math.cos(t),-Math.sin(t),0,0,
+					Math.sin(t),Math.cos(t),0,0,
+					0,0,1,0,
+					0,0,0,1
+				];
+			};
+			
+			const setup = (BG)=> {
+
+				const canvas = document.createElement("canvas");
+				Object.assign(canvas,{width:width,height:height});
+				Object.assign(canvas.style,{"vertical-align":"top","outline":"1px solid #333"});
+				
+				const div = document.createElement("div");
+				Object.assign(div.style,{"display":"flex","width":"100vw","height":"100dvh"});
+				div.appendChild(canvas);
+				
+				const gl = canvas.getContext("webgl",{antialias:true});
+				gl.getExtension("OES_element_index_uint");
+				
+				BG.program = twgl.createProgramFromSources(gl,[`
+attribute vec3 position;
+attribute vec3 rgb;
+uniform mat4 PM;
+uniform mat4 TM;
+varying vec3 v_rgb;
+void main() {
+	v_rgb = rgb;
+	gl_Position = PM*TM*vec4(position,1.0);
+
+}`,`
+precision mediump float;
+uniform sampler2D u_texture;
+varying vec3 v_rgb;
+void main() {
+	gl_FragColor = vec4(v_rgb,1.0);
+}`]);
+				
+		
+				
+				if(BG.program) {
+					
+					BG.programInfo = twgl.createProgramInfoFromProgram(gl,BG.program);
+					
+					BG.bufferInfo = twgl.createBufferInfoFromArrays(gl,{
+						position:{numComponents:3,data:BG.v},
+						rgb:{numComponents:3,data:BG.rgb},
+						indices:{numComponents:3,data:BG.f}
+					});
+					
+					twgl.setDefaults({textureColor:[0,0,0,0]});
+					BG.uniforms = {
+						PM:[],
+						TM:[],
+						u_texture:twgl.createTexture(gl,{
+							min:gl.LINEAR,
+							mag:gl.LINEAR,
+							//minMag:gl.LINEAR_MIPMAP_LINEAR,
+							format:gl.RGBA,
+							src:BG.img
+						})
+					};
+					
+					const resize = (e)=>{
+						const sx = window.innerWidth/width;
+						const sy = window.innerHeight/height;
+						if(sx<sy) {
+							Object.assign(canvas.style,{"width":"100dvw","height":"auto","margin":"auto 0"});
+							
+						}
+						else {
+							Object.assign(canvas.style,{"width":"auto","height":"100dvh","margin":"0 auto"});
+						}
+					}
+					
+					let tid = 0;
+					window.addEventListener("resize",(e)=>{
+						if(tid) clearTimeout(tid);
+						tid = setTimeout((e)=>resize(),15);
+					});
+					
+					const draw = ()=>{
+						
+						gl.viewport(0,0,width,height);
+						gl.enable(gl.DEPTH_TEST);
+						gl.depthFunc(gl.LEQUAL);
+						
+						gl.clearColor(0.0,0.0,0.0,1.0);
+						gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+						
+						let dry = (Math.cos(Math.PI+Math.PI*(frame/(totalFrames>>1))));
+						dry = (dry+1.0)*0.5;
+						const wet = 1.0-dry;
+						
+						const TM = mul(
+							Z(E[0][2]*dry+E[1][2]*wet),
+							mul(
+								Y(E[0][1]*dry+E[1][1]*wet),
+								X(E[0][0]*dry+E[1][0]*wet)
+							)
+						);
+						
+						TM[12] = (T[0][0]*dry)+(T[1][0]*wet);
+						TM[13] = (T[0][1]*dry)+(T[1][1]*wet);
+						TM[14] = (T[0][2]*dry)+(T[1][2]*wet);
+						
+						for(var n=0; n<16; n++) {
+							BG.uniforms.PM[n] = PM[0][n]*wet + PM[1][n]*dry;
+						}
+						
+						BG.uniforms.TM = TM;
+						
+						gl.useProgram(BG.program);
+						twgl.setBuffersAndAttributes(gl,BG.programInfo,BG.bufferInfo);
+						twgl.setUniforms(BG.programInfo,BG.uniforms);
+						gl.drawElements(gl.TRIANGLES,BG.bufferInfo.numElements,gl.UNSIGNED_INT,0);
+						
+						frame++; 
+						frame%=totalFrames;
+						
+					};
+					
+					setInterval(draw,33);
+					resize();
+					draw();
+					document.body.appendChild(div);
+					
+				}
+			}
+			
+			
+			import { BGLoader } from "./BG16Loader.js";
+
+			BGLoader.load(["BG.bin"],(BG)=>{
+				setup(BG["BG.bin"]);
+			});
+			
+		</script>
+	</body>
+</html>
