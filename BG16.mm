@@ -46,9 +46,9 @@ int main(int argc, char *argv[]) {
                             }
                             else {
                                 _rgb.push_back(simd::uchar3{
-                                    (unsigned char)(255),
-                                    (unsigned char)(255),
-                                    (unsigned char)(255),
+                                    (unsigned char)(0x80),
+                                    (unsigned char)(0x80),
+                                    (unsigned char)(0x80),
                                 });
                             }
                         }
@@ -112,9 +112,7 @@ int main(int argc, char *argv[]) {
             dict[@"accessors"][0][@"count"] = [NSNumber numberWithInt:v16.size()/3];
             NSLog(@"%d",[dict[@"accessors"][0][@"count"] intValue]);
             
-            while(v16.size()%4!=0) {
-                v16.push_back(0);
-            }
+            while(v16.size()%4!=0) { v16.push_back(0); }
             offset+=v16.size()*sizeof(unsigned short);
             
             dict[@"bufferViews"][1][@"byteOffset"] = [NSNumber numberWithInt:offset];
@@ -122,9 +120,7 @@ int main(int argc, char *argv[]) {
             dict[@"accessors"][1][@"count"] = [NSNumber numberWithInt:rgb.size()/3];
             NSLog(@"%d",[dict[@"accessors"][1][@"count"] intValue]);
             
-            while(rgb.size()%4!=0) {
-                rgb.push_back(0);
-            }
+            while(rgb.size()%4!=0) { rgb.push_back(0); }
             offset+=rgb.size()*sizeof(unsigned char);
             
             dict[@"buffers"][0][@"byteLength"] = [NSNumber numberWithInt:offset];
@@ -132,9 +128,7 @@ int main(int argc, char *argv[]) {
             NSMutableData *json = [[NSMutableData alloc] init];
             [json appendData:[NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingWithoutEscapingSlashes|NSJSONWritingSortedKeys error:nil]];
             
-            while(json.length%4!=0) {
-                [json appendBytes:new const char[1]{0x20} length:1];
-            }
+            while(json.length%4!=0) { [json appendBytes:new const char[1]{0x20} length:1]; }
             
             NSMutableData *glb = [[NSMutableData alloc] init];
             [glb appendBytes:new const char[4]{'B','G','1','6'} length:4];

@@ -43,40 +43,34 @@ export const BGLoader = Object.freeze({
 							rgb[n] = rgb8[n]/255.0;
 						}
 						
+						const result = {};
+						
 						if(len<=0xFFFF) {
 							
 							const f = new Uint16Array(len);
-							for(var n=0; n<f.length; n++) {
-								f[n] = n;
-							}
+							for(var n=0; n<f.length; n++) { f[n] = n; }
 							
-							const result = {};
 							result[url] = {
 								"v":v,
 								"rgb":rgb,
 								"f":f,
 								"bytes":2
 							}
-							
-							init(result);
 						}
 						else {
 							
 							const f = new Uint32Array(len);
-							for(var n=0; n<f.length; n++) {
-								f[n] = n;
-							}
+							for(var n=0; n<f.length; n++) { f[n] = n; }
 							
-							const result = {};
 							result[url] = {
 								"v":v,
 								"rgb":rgb,
 								"f":f,
 								"bytes":4
 							}
-							
-							init(result);
 						}
+						
+						init(result);
 					}
 				}
 			}
