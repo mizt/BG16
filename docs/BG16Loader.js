@@ -32,23 +32,23 @@ export const BGLoader = Object.freeze({
 						const rgb8 = U8.slice(offset+byteOffsets[1],(offset+byteOffsets[1]+byteLengths[1]));
 						
 						const len = +(json["accessors"][0]["count"]);
-						
-						const v = new Float32Array(len*3);
-						for(var n=0; n<v.length; n++) {
-							v[n] = U16toF32(v16[n]);
-						}
-						
-						const rgb = new Float32Array(len*3);
-						for(var n=0; n<rgb.length; n++) {
-							rgb[n] = rgb8[n]/255.0;
-						}
-						
-						const f = new Uint32Array(len);
-						for(var n=0; n<f.length; n++) {
-							f[n] = n;
-						}
-						
-						if(v.length&&rgb.length) {
+						if(len<=0xFFFF) {
+							
+							const v = new Float32Array(len*3);
+							for(var n=0; n<v.length; n++) {
+								v[n] = U16toF32(v16[n]);
+							}
+							
+							const rgb = new Float32Array(len*3);
+							for(var n=0; n<rgb.length; n++) {
+								rgb[n] = rgb8[n]/255.0;
+							}
+							
+							const f = new Uint32Array(len);
+							for(var n=0; n<f.length; n++) {
+								f[n] = n;
+							}
+							
 							const result = {};
 							result[url] = {
 								"v":v,
@@ -56,7 +56,12 @@ export const BGLoader = Object.freeze({
 								"f":f,
 								"bytes":4
 							}
+							
 							init(result);
+						}
+						else {
+							
+							init(null);
 						}
 					}
 				}
@@ -81,11 +86,13 @@ export const BGLoader = Object.freeze({
 			let data = {};
 			
 			const onload = (result) => {
-				const key = Object.keys(result)[0];
-				data[key] = result[key];
-				loaded++;
-				if(loaded===list.length) {
-					init(data);
+				if(result) {
+					const key = Object.keys(result)[0];
+					data[key] = result[key];
+					loaded++;
+					if(loaded===list.length) {
+						init(data);
+					}
 				}
 			};
 			

@@ -4,7 +4,7 @@
 		<meta charset="UTF-8">
 		<title>BG16</title>
 		<meta name="robots" content="noindex, nofollow">
-		<link rel="icon" href="data:;base64,=">
+		<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII=">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			
@@ -125,8 +125,6 @@ void main() {
 	gl_FragColor = vec4(v_rgb,1.0);
 }`]);
 				
-		
-				
 				if(BG.program) {
 					
 					BG.programInfo = twgl.createProgramInfoFromProgram(gl,BG.program);
@@ -137,17 +135,9 @@ void main() {
 						indices:{numComponents:3,data:BG.f}
 					});
 					
-					twgl.setDefaults({textureColor:[0,0,0,0]});
 					BG.uniforms = {
 						PM:[],
-						TM:[],
-						u_texture:twgl.createTexture(gl,{
-							min:gl.LINEAR,
-							mag:gl.LINEAR,
-							//minMag:gl.LINEAR_MIPMAP_LINEAR,
-							format:gl.RGBA,
-							src:BG.img
-						})
+						TM:[]
 					};
 					
 					const resize = (e)=>{
