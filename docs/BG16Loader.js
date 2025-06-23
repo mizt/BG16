@@ -11,7 +11,7 @@ export const BGLoader = Object.freeze({
 		
 		const U8 = new Uint8Array(data);
 		
-		if(new TextDecoder().decode(U8.slice(0,4))==="glTF") {
+		if(new TextDecoder().decode(U8.slice(0,4))==="BG16") {
 			
 			const size = U8toU32(U8,4*3);
 			if(new TextDecoder().decode(U8.slice(4*4,4*4+4))==="JSON") {

@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
             }
             
             NSMutableData *glb = [[NSMutableData alloc] init];
-            [glb appendBytes:new const char[4]{'g','l','T','F'} length:4];
+            [glb appendBytes:new const char[4]{'B','G','1','6'} length:4];
             [glb appendBytes:new unsigned int[1]{2} length:4];
             [glb appendBytes:new unsigned int[1]{((4*7)+(unsigned int)json.length)+offset} length:4];
             [glb appendBytes:new unsigned int[1]{(unsigned int)json.length} length:4];
